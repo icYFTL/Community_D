@@ -31,6 +31,8 @@ class ImageHandler(object):
             alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
             watermark.putalpha(alpha)
         layer = Image.new('RGBA', (1280, 640), (0, 0, 0, 0))
-        layer.paste(watermark, (0, 0))
+        a = random.randint(-20, 0)
+        b = random.randint(-20, 0)
+        layer.paste(watermark, (a, b))
 
         return Image.composite(layer, image, layer)
