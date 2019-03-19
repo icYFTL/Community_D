@@ -1,3 +1,7 @@
 [Beta v1.0 Release] (v1.0)
 
     • Added basic functions.
+
+[Fixes] (v1.1)
+
+    • Работаю, я, работаю ебена рот
