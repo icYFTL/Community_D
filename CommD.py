@@ -12,8 +12,6 @@ import atexit
 
 atexit.register(ExitHandler.bye)
 
-
-
 ### PREVIEW ###
 
 Preview.do()
@@ -21,10 +19,10 @@ Preview.do()
 ### INPUT ###
 
 input = InputWorker()
-token = input.WorkOut()
+token, token_c = map(str, input.WorkOut())
 
 ### API WORK ###
-ApiW = ApiWorker(token)
+ApiW = ApiWorker(token, token_c)
 
 while True:
     ApiW.post()

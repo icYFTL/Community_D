@@ -11,9 +11,9 @@ import time
 
 
 class ApiWorker:
-    def __init__(self, token):
+    def __init__(self, token, token_c):
         self.token = token
-        self.commtoken = "c6d7f87a3aa3817573727b8295db7000f7c84cb61ebcbd3233b35a13050f5c12c971a1e6531dc6ec03422"
+        self.commtoken = token_c
         self.vk_api = None
         self.vk_api_c = None
         self.get_session()

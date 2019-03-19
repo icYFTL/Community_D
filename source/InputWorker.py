@@ -25,17 +25,8 @@ class InputWorker:
     def WorkOut(self):
         if self.path:
             token = self.ini.get("Data", "Token")
-            return token
-        token = input("Please, give me your VK access token: ")
-        while True:
-            if len(token) < 85:
-                print("Bad access token.")
-                token = input("Please, give me your VK access token: ")
-            else:
-                break
-        self.ini.add_section('Data')
-        self.ini.set('Data', 'Token', token)
-        f = open('source/Data.ini', 'w')
-        self.ini.write(f)
-        f.close()
-        return token
+            token_c = self.ini.get("Data", "Token_c")
+            return [token, token_c]
+        else:
+            print('Bad "Data.ini". Look readme.txt.')
+            exit()
