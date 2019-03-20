@@ -148,16 +148,17 @@ class ApiWorker:
 
             ## ACCEPTABLE MESSAGE SENDING
 
-            self.vk_api_c.messages.send(user_id=239125937, message=data[0],
-                                        attachment="photo" + str(save_method['owner_id']) + "_" + str(
-                                            save_method['id']) + "_" +
-                                                   str(save_method['access_key']),
-                                        random_id=random.randint(0, 10000))
-            time.sleep(0.5)
-            self.vk_api_c.messages.send(user_id=239125937,
-                                        message="Accept post?\nYou can:\n1 - Accept\n2 - Show next",
-                                        random_id=random.randint(0, 10000))
-
+            for i in StaticData.admins:
+                self.vk_api_c.messages.send(user_id=i, message=data[0],
+                                            attachment="photo" + str(save_method['owner_id']) + "_" + str(
+                                                save_method['id']) + "_" +
+                                                       str(save_method['access_key']),
+                                            random_id=random.randint(0, 10000))
+                time.sleep(0.5)
+                self.vk_api_c.messages.send(user_id=i,
+                                            message="Accept post?\nYou can:\n1 - Accept\n2 - Show next",
+                                            random_id=random.randint(0, 10000))
+                time.sleep(0.5)
             self.get_long_poll()
             print('Messages sent.')
 
@@ -241,6 +242,12 @@ class ApiWorker:
                         break
                 except IndexError:
                     print('Waiting for message...')
+                    if int(datetime.now().strftime('%H')) == 23:
+                        for i in StaticData.admins:
+                            self.vk_api_c.messages.send(user_id=i,
+                                                        message="Preparing for night. Next posts will be available from 10 AM.",
+                                                        random_id=random.randint(0, 10000))
+                        time.sleep(39600)
                     time.sleep(1)
                     continue
                 except Exception as e:
