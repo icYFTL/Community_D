@@ -8,6 +8,7 @@ from PIL import Image
 from StaticData import StaticData
 from datetime import datetime
 import time
+import pytz
 
 
 class ApiWorker:
@@ -23,6 +24,41 @@ class ApiWorker:
 
     def get_long_poll(self):
         self.community_long_poll = self.vk_api_c.messages.getLongPollServer(need_pts=1)
+
+    def get_time(self):
+        return datetime.now(pytz.timezone('Europe/Moscow'))
+
+    def time_controller(self):
+        night = ['23', '00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
+        current_time = self.get_time().strftime('%H')
+        if current_time in night:
+            for i in StaticData.admins:
+                self.vk_api_c.messages.send(user_id=i,
+                                            message="Preparing for night. Next posts will be available in 10 AM.",
+                                            random_id=random.randint(0, 10000))
+            print('\nPreparing for global sleep...')
+            if current_time == '23':
+                time.sleep(39600)
+            elif current_time == '00':
+                time.sleep(3600)
+            elif current_time == '01':
+                time.sleep(32400)
+            elif current_time == '02':
+                time.sleep(28800)
+            elif current_time == '03':
+                time.sleep(25200)
+            elif current_time == '04':
+                time.sleep(21600)
+            elif current_time == '05':
+                time.sleep(18000)
+            elif current_time == '06':
+                time.sleep(14400)
+            elif current_time == '07':
+                time.sleep(10800)
+            elif current_time == '08':
+                time.sleep(7200)
+            elif current_time == '09':
+                time.sleep(3600)
 
     def get_session(self):
         try:
@@ -43,14 +79,9 @@ class ApiWorker:
             return
 
     def groups_checker(self):
-        if datetime.now().strftime('%H') == '23':
-            for i in StaticData.admins:
-                self.vk_api_c.messages.send(user_id=i,
-                                            message="Preparing for night. Next posts will be available from 10 AM.",
-                                            random_id=random.randint(0, 10000))
-            time.sleep(39600)
+        self.time_controller()
         print('Started "GroupChecker"')
-        current_date = datetime.now().strftime('%Y-%m-%d').split('-')
+        current_date = self.get_time().strftime('%Y-%m-%d').split('-')
         for i in StaticData.groups:
 
             posts = self.vk_api.wall.get(owner_id=int(i),
@@ -69,12 +100,7 @@ class ApiWorker:
         print('Parsing data has been started.')
         while True:
             if self.groups_checker() is False:
-                if datetime.now().strftime('%H') == '23':
-                    for i in StaticData.admins:
-                        self.vk_api_c.messages.send(user_id=i,
-                                                    message="Preparing for night. Next posts will be available from 10 AM.",
-                                                    random_id=random.randint(0, 10000))
-                    time.sleep(39600)
+                self.time_controller()
                 continue
             else:
                 break
@@ -249,17 +275,10 @@ class ApiWorker:
                         break
                 except IndexError:
                     print('Waiting for message...')
-                    if datetime.now().strftime('%H') == '23':
-                        for i in StaticData.admins:
-                            self.vk_api_c.messages.send(user_id=i,
-                                                        message="Preparing for night. Next posts will be available from 10 AM.",
-                                                        random_id=random.randint(0, 10000))
-                        time.sleep(39600)
+                    self.time_controller()
                     time.sleep(1)
                     continue
                 except Exception as e:
                     print(str(e))
                     self.get_long_poll()
                     continue
-
-
