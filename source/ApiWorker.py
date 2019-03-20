@@ -19,7 +19,7 @@ class ApiWorker:
         self.get_session()
         self.usedids = []
         self.community_long_poll = None
-        self.messages_date = []
+        self.available_groups = []
 
     def get_long_poll(self):
         self.community_long_poll = self.vk_api_c.messages.getLongPollServer(need_pts=1)
@@ -35,60 +35,57 @@ class ApiWorker:
             FileController.RemoveINI()
             return
 
-    def get_last_posts(self):
-        try:
-            posts = self.vk_api.wall.get(owner_id=StaticData.groups[random.randint(0, len(StaticData.groups) - 1)],
-                                         count=20)
-            return posts
-        except:
-            print('Bad access token.\nPlease restart the script.')
-            FileController.RemoveINI()
-            exit()
+    def groups_checker(self):
+        current_date = datetime.now().strftime('%Y-%m-%d').split('-')
+        for i in StaticData.groups:
+
+            posts = self.vk_api.wall.get(owner_id=int(i),
+                                         count=20, offset=0)
+            for j in range(len(posts.get('items'))):
+                post_date = datetime.utcfromtimestamp(int(posts.get('items')[j].get('date'))).strftime(
+                    '%Y-%m-%d').split('-')
+                if post_date == current_date:
+                    self.available_groups.append(posts.get('items')[j])
+            time.sleep(1)
+        if self.available_groups is []:
+            return False
 
     def parse_data(self):
-        posts = self.get_last_posts()
-        items = posts.get('items')
-
-        post_date = datetime.utcfromtimestamp(int(items[0].get('date'))).strftime('%Y-%m-%d').split('-')
-        current_date = datetime.now().strftime('%Y-%m-%d').split('-')
-
-        counter = 0
-
-
-        id = random.randrange(1, len(items), 1)
         while True:
-            if current_date != post_date:
-                post_date = datetime.utcfromtimestamp(int(items[id].get('date'))).strftime('%Y-%m-%d').split('-')
-                current_date = datetime.now().strftime('%Y-%m-%d').split('-')
-                self.usedids.append(items[id].get('id'))
-                id = random.randrange(1, len(items), 1)
-                if counter == len(items):
-                    print('No available posts at groups. Try later.')
-                    exit()
-                counter += 1
+            if self.groups_checker() is False:
+                print('No available posts at groups. I\'ll try later.')
+                time.sleep(3600)
                 continue
-            if items[id].get('id') in self.usedids:
-                id = random.randrange(1, len(items), 1)
-                continue
-            break
-
-        self.usedids.append(items[id].get('id'))
-
-        text = items[id].get('text')
+            else:
+                break
+        text = None
         attachment = None
-        try:
-            attachment = items[id].get('attachments')[0].get('photo').get('photo_807')
-        except:
+        for i in self.available_groups:
+            attachment_m = None
             try:
-                attachment = items[id].get('attachments')[0].get('photo').get('photo_1280')
+                if i.get('id') in self.usedids:
+                    continue
+                text = i.get('text')
+                attachment_m = i.get('attachments')
+                self.usedids.append(i.get('id'))
             except:
-                pass
-
-        return [text, attachment]
+                continue
+            for j in attachment_m:
+                if j.get('type') == 'photo':
+                    try:
+                        attachment = j.get('photo').get('photo_2560')
+                    except:
+                        try:
+                            attachment = j.get('photo').get('photo_1280')
+                        except:
+                            try:
+                                attachment = j.get('photo').get('photo_807')
+                            except:
+                                continue
+            return [text, attachment]
 
     def before_post(self):
         data = self.parse_data()
-
         while data is None:
             data = self.parse_data()
             time.sleep(1)
@@ -144,20 +141,39 @@ class ApiWorker:
                                         random_id=random.randint(0, 10000))
 
             self.get_long_poll()
+
+            ## WAIT FOR CALLBACK
+
             while True:
                 try:
                     repl = self.vk_api_c.messages.getLongPollHistory(ts=self.community_long_poll['ts'],
                                                                      pts=self.community_long_poll['pts'])
+                    sender = repl.get('messages').get('items')[0].get('from_id')
+                    if sender not in StaticData.admins:
+                        self.get_long_poll()
+                        continue
+                    sender = self.vk_api.users.get(user_ids=sender)
+                    sender = '{} {}'.format(sender[0].get('first_name'), sender[0].get('last_name'))
+
                     repl = repl.get('messages').get('items')[0].get('text')
+
                     self.get_long_poll()
 
                     if repl == '1':
+                        for i in StaticData.admins:
+                            self.vk_api_c.messages.send(user_id=i,
+                                                        message="Previous post has been accepted by {}".format(sender),
+                                                        random_id=random.randint(0, 10000))
                         break
                     if repl == '2':
+                        for i in StaticData.admins:
+                            self.vk_api_c.messages.send(user_id=i,
+                                                        message="Previous post has been declined by {}".format(sender),
+                                                        random_id=random.randint(0, 10000))
                         return False
-                    time.sleep(5)
+                    time.sleep(1)
                 except IndexError:
-                    time.sleep(5)
+                    time.sleep(1)
                     continue
                 except Exception as e:
                     print(str(e))
