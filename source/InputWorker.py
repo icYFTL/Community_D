@@ -1,6 +1,7 @@
 import os
 from configparser import ConfigParser
 from configparser import ParsingError
+from configparser import NoOptionError
 from StaticData import StaticData
 import FileController
 
@@ -19,14 +20,19 @@ class InputWorker:
             except ParsingError:
                 FileController.RemoveINI()
                 self.path = False
+
         else:
             self.path = False
 
     def WorkOut(self):
         if self.path:
-            token = self.ini.get("Data", "Token")
-            token_c = self.ini.get("Data", "Token_c")
-            return [token, token_c]
+            try:
+                token = self.ini.get("Data", "Token")
+                token_c = self.ini.get("Data", "Token_c")
+                return [token, token_c]
+            except NoOptionError as e:
+                print(str(e))
+                exit()
         else:
             print('Bad "Data.ini". Look readme.txt.')
             exit()

@@ -26,16 +26,24 @@ class ApiWorker:
 
     def get_session(self):
         try:
+            print('Getting sessions...')
+
             session = vk.Session(access_token=self.token)
             self.vk_api = vk.API(session, v='5.74')
 
+            print('Got session for user.')
+
             commsession = vk.Session(access_token=self.commtoken)
             self.vk_api_c = vk.API(commsession, v='5.92')
+
+            print('Got session for community.')
+
         except:
             FileController.RemoveINI()
             return
 
     def groups_checker(self):
+        print('Started "GroupChecker"')
         current_date = datetime.now().strftime('%Y-%m-%d').split('-')
         for i in StaticData.groups:
 
@@ -46,15 +54,21 @@ class ApiWorker:
                     '%Y-%m-%d').split('-')
                 if post_date == current_date:
                     self.available_groups.append(posts.get('items')[j])
-            time.sleep(1)
+            time.sleep(0.4)
+        print('"GroupChecker" has been terminated.')
         if self.available_groups is []:
             return False
 
     def parse_data(self):
+        print('Parsing data has been started.')
         while True:
             if self.groups_checker() is False:
-                print('No available posts at groups. I\'ll try later.')
-                time.sleep(3600)
+                if int(datetime.now().strftime('%H')) == 23:
+                    for i in StaticData.admins:
+                        self.vk_api_c.messages.send(user_id=i,
+                                                    message="Preparing for night. Next posts will be available from 10 AM.",
+                                                    random_id=random.randint(0, 10000))
+                    time.sleep(39600)
                 continue
             else:
                 break
@@ -72,21 +86,20 @@ class ApiWorker:
                 continue
             for j in attachment_m:
                 if j.get('type') == 'photo':
-                    try:
+
+                    if '2560' in str(j):
                         attachment = j.get('photo').get('photo_2560')
-                    except:
-                        try:
-                            attachment = j.get('photo').get('photo_1280')
-                        except:
-                            try:
-                                attachment = j.get('photo').get('photo_807')
-                            except:
-                                continue
+                    elif '1280' in str(j):
+                        attachment = j.get('photo').get('photo_1280')
+                    elif '807' in str(j):
+                        attachment = j.get('photo').get('photo_807')
+            print('Got photo and text.')
             return [text, attachment]
 
     def before_post(self):
+        print('Preparing for post has been initiated.')
         data = self.parse_data()
-        while data is None:
+        while data[1] is None:
             data = self.parse_data()
             time.sleep(1)
 
@@ -102,9 +115,11 @@ class ApiWorker:
                     f.write(requests.get(data[1]).content)
                     break
                 except requests.exceptions.MissingSchema:
+                    print('Bad request')
                     time.sleep(1)
                     continue
             f.close()
+            print('Got photo.')
 
             ## WATERMARK LANDING ##
 
@@ -115,6 +130,7 @@ class ApiWorker:
             result.save('./source/tmp/result.png')
 
             os.remove('source/tmp/img.jpg')
+            print('Watermark landing done.')
 
             ## IMAGE UPLOADING ##
 
@@ -128,6 +144,7 @@ class ApiWorker:
             output = 'photo{}_{}'.format(save_method['owner_id'], save_method['id'])
             data = [data[0], output]
             os.remove('./source/tmp/result.png')
+            print('Image uploaded.')
 
             ## ACCEPTABLE MESSAGE SENDING
 
@@ -136,11 +153,13 @@ class ApiWorker:
                                             save_method['id']) + "_" +
                                                    str(save_method['access_key']),
                                         random_id=random.randint(0, 10000))
+            time.sleep(0.5)
             self.vk_api_c.messages.send(user_id=239125937,
                                         message="Accept post?\nYou can:\n1 - Accept\n2 - Show next",
                                         random_id=random.randint(0, 10000))
 
             self.get_long_poll()
+            print('Messages sent.')
 
             ## WAIT FOR CALLBACK
 
@@ -157,7 +176,10 @@ class ApiWorker:
 
                     repl = repl.get('messages').get('items')[0].get('text')
 
+                    print('Got repl: {}'.format(repl))
+
                     self.get_long_poll()
+                    print('Long poll restarted.')
 
                     if repl == '1':
                         for i in StaticData.admins:
@@ -173,6 +195,52 @@ class ApiWorker:
                         return False
                     time.sleep(1)
                 except IndexError:
+                    print('Waiting for message...')
+                    time.sleep(1)
+                    continue
+                except Exception as e:
+                    print(str(e))
+                    self.get_long_poll()
+                    continue
+            print('Preparing done.')
+            return data
+
+    def post(self):
+        data = self.before_post()
+
+        if data is False:
+            self.post()
+            return
+        if data[1] is None:
+            return False
+        self.vk_api.wall.post(owner_id=-99558704, message=data[0], attachments=data[1])
+        for i in StaticData.admins:
+            self.vk_api_c.messages.send(user_id=i,
+                                        message="The next post will be offered in 1 hour.\nWanna post now?\n1 - Yes\n2 - Not now",
+                                        random_id=random.randint(0, 10000))
+            print('Posted.\n\n\n\n')
+            while True:
+                try:
+                    repl = self.vk_api_c.messages.getLongPollHistory(ts=self.community_long_poll['ts'],
+                                                                     pts=self.community_long_poll['pts'])
+                    sender = repl.get('messages').get('items')[0].get('from_id')
+                    if sender not in StaticData.admins:
+                        self.get_long_poll()
+                        continue
+                    sender = self.vk_api.users.get(user_ids=sender)
+                    sender = '{} {}'.format(sender[0].get('first_name'), sender[0].get('last_name'))
+
+                    repl = repl.get('messages').get('items')[0].get('text')
+
+                    if repl == '1':
+                        self.post()
+                        return
+                    if repl == '2':
+                        time.sleep(3600)
+                        self.get_long_poll()
+                        break
+                except IndexError:
+                    print('Waiting for message...')
                     time.sleep(1)
                     continue
                 except Exception as e:
@@ -180,13 +248,4 @@ class ApiWorker:
                     self.get_long_poll()
                     continue
 
-            return data
 
-    def post(self):
-        data = self.before_post()
-        if data is False:
-            self.post()
-            return
-        if data[1] is None:
-            return False
-        self.vk_api.wall.post(owner_id=-99558704, message=data[0], attachments=data[1])
