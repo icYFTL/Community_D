@@ -43,6 +43,12 @@ class ApiWorker:
             return
 
     def groups_checker(self):
+        if datetime.now().strftime('%H') == '23':
+            for i in StaticData.admins:
+                self.vk_api_c.messages.send(user_id=i,
+                                            message="Preparing for night. Next posts will be available from 10 AM.",
+                                            random_id=random.randint(0, 10000))
+            time.sleep(39600)
         print('Started "GroupChecker"')
         current_date = datetime.now().strftime('%Y-%m-%d').split('-')
         for i in StaticData.groups:
@@ -63,7 +69,7 @@ class ApiWorker:
         print('Parsing data has been started.')
         while True:
             if self.groups_checker() is False:
-                if int(datetime.now().strftime('%H')) == 23:
+                if datetime.now().strftime('%H') == '23':
                     for i in StaticData.admins:
                         self.vk_api_c.messages.send(user_id=i,
                                                     message="Preparing for night. Next posts will be available from 10 AM.",
@@ -211,6 +217,7 @@ class ApiWorker:
 
         if data is False:
             self.post()
+            print('\n\n\n\n')
             return
         if data[1] is None:
             return False
@@ -242,7 +249,7 @@ class ApiWorker:
                         break
                 except IndexError:
                     print('Waiting for message...')
-                    if int(datetime.now().strftime('%H')) == 23:
+                    if datetime.now().strftime('%H') == '23':
                         for i in StaticData.admins:
                             self.vk_api_c.messages.send(user_id=i,
                                                         message="Preparing for night. Next posts will be available from 10 AM.",
