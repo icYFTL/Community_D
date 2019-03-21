@@ -1,5 +1,10 @@
+import sys
+
+sys.path.append('./source/exceptions/')
+
+from VkApiException import VkApiException
+
 import vk
-from FileController import FileController
 import random
 import os
 import requests
@@ -28,37 +33,43 @@ class ApiWorker:
     def get_time(self):
         return datetime.now(pytz.timezone('Europe/Moscow'))
 
+    def message_send(self, message):
+        for i in StaticData.admins:
+            self.vk_api_c.messages.send(user_id=i,
+                                        message=message,
+                                        random_id=random.randint(0, 10000))
+
     def time_controller(self):
         night = ['23', '00', '01', '02', '03', '04', '05', '06', '07', '08', '09']
         current_time = self.get_time().strftime('%H')
         if current_time in night:
-            for i in StaticData.admins:
-                self.vk_api_c.messages.send(user_id=i,
-                                            message="Preparing for night. Next posts will be available in 10 AM.",
-                                            random_id=random.randint(0, 10000))
+            self.message_send('Preparing for night.\nThe next posts will be available in 10 AM.')
             print('\nPreparing for global sleep...')
             if current_time == '23':
-                time.sleep(39600)
+                time.sleep(39600 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '00':
-                time.sleep(3600)
+                time.sleep(36000 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '01':
-                time.sleep(32400)
+                time.sleep(32400 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '02':
-                time.sleep(28800)
+                time.sleep(28800 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '03':
-                time.sleep(25200)
+                time.sleep(25200 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '04':
-                time.sleep(21600)
+                time.sleep(21600 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '05':
-                time.sleep(18000)
+                time.sleep(18000 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '06':
-                time.sleep(14400)
+                time.sleep(14400 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '07':
-                time.sleep(10800)
+                time.sleep(10800 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '08':
-                time.sleep(7200)
+                time.sleep(7200 + int(self.get_time().strftime('%M')) * 60)
             elif current_time == '09':
-                time.sleep(3600)
+                time.sleep(3600 + int(self.get_time().strftime('%M')) * 60)
+            else:
+                return False
+        return True
 
     def get_session(self):
         try:
@@ -75,15 +86,13 @@ class ApiWorker:
             print('Got session for community.')
 
         except:
-            FileController.RemoveINI()
-            return
+            raise VkApiException
 
     def groups_checker(self):
         self.time_controller()
-        print('Started "GroupChecker"')
+        print('Started "GroupsChecker"')
         current_date = self.get_time().strftime('%Y-%m-%d').split('-')
         for i in StaticData.groups:
-
             posts = self.vk_api.wall.get(owner_id=int(i),
                                          count=20, offset=0)
             for j in range(len(posts.get('items'))):
@@ -92,18 +101,19 @@ class ApiWorker:
                 if post_date == current_date:
                     self.available_groups.append(posts.get('items')[j])
             time.sleep(0.4)
-        print('"GroupChecker" has been terminated.')
+        print('"GroupsChecker" has been terminated.')
         if self.available_groups is []:
-            return False
+            if self.time_controller() is False:
+                self.message_send('Unfortunately, the posts ended. Will retry in 1 hour')
+                return False
+
 
     def parse_data(self):
         print('Parsing data has been started.')
-        while True:
-            if self.groups_checker() is False:
-                self.time_controller()
-                continue
-            else:
-                break
+        if self.groups_checker() is False:
+            time.sleep(3600)
+            self.post()
+            return
         text = None
         attachment = None
         for i in self.available_groups:
@@ -125,31 +135,40 @@ class ApiWorker:
                         attachment = j.get('photo').get('photo_1280')
                     elif '807' in str(j):
                         attachment = j.get('photo').get('photo_807')
+                    else:
+                        attachment = None
+                        print('I can\'t resolve photo.\nRetrying...')
+                        return
             print('Got photo and text.')
             return [text, attachment]
 
     def before_post(self):
         print('Preparing for post has been initiated.')
         data = self.parse_data()
+
         while data is None:
             data = self.parse_data()
             time.sleep(1)
 
-        if data[1] != '':
-            try:
-                os.mkdir('./source/tmp/')
-            except:
-                pass
+        while data[0] is None or data[1] is None:
+            data = self.parse_data()
+            time.sleep(1)
+
+        try:
+            os.mkdir('./source/tmp/')
+        except:
+            pass
 
             f = open('source/tmp/img.jpg', 'wb')
-            while True:
-                try:
-                    f.write(requests.get(data[1]).content)
-                    break
-                except requests.exceptions.MissingSchema:
-                    print('Bad request')
-                    time.sleep(1)
-                    continue
+            try:
+                f.write(requests.get(data[1]).content)
+            except requests.exceptions.MissingSchema:
+                print('Bad request.\nFunction will be restarted.')
+                f.close()
+                time.sleep(1)
+                self.before_post()
+                return
+
             f.close()
             print('Got photo.')
 
@@ -267,9 +286,11 @@ class ApiWorker:
                     repl = repl.get('messages').get('items')[0].get('text')
 
                     if repl == '1':
+
                         self.post()
                         return
                     if repl == '2':
+                        self.message_send('The next post will offered in 1 hour.')
                         time.sleep(3600)
                         self.get_long_poll()
                         break

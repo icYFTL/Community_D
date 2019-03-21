@@ -1,9 +1,15 @@
+import sys
+
+sys.path.append('./source/exceptions/')
+
+from BadIniException import BadIniException
+
+
 import os
 from configparser import ConfigParser
 from configparser import ParsingError
 from configparser import NoOptionError
 from StaticData import StaticData
-import FileController
 
 
 
@@ -14,25 +20,18 @@ class InputWorker:
         self.PathChecker()
 
     def PathChecker(self):
-        if os.path.exists(self.path):
-            try:
-                self.ini.read(self.path)
-            except ParsingError:
-                FileController.RemoveINI()
-                self.path = False
+        try:
+            self.ini.read(self.path)
+        except ParsingError:
+            raise BadIniException
 
-        else:
-            self.path = False
 
     def WorkOut(self):
-        if self.path:
-            try:
-                token = self.ini.get("Data", "Token")
-                token_c = self.ini.get("Data", "Token_c")
-                return [token, token_c]
-            except NoOptionError as e:
-                print(str(e))
-                exit()
-        else:
-            print('Bad "Data.ini". Look readme.txt.')
-            exit()
+        try:
+            token = self.ini.get("Data", "Token")
+            token_c = self.ini.get("Data", "Token_c")
+            return [token, token_c]
+        except:
+            raise BadIniException
+
+
