@@ -131,7 +131,7 @@ class ApiWorker:
     def before_post(self):
         print('Preparing for post has been initiated.')
         data = self.parse_data()
-        while data[1] is None:
+        while data is None:
             data = self.parse_data()
             time.sleep(1)
 
@@ -245,7 +245,7 @@ class ApiWorker:
             self.post()
             print('\n\n\n\n')
             return
-        if data[1] is None:
+        if data is None:
             return False
         self.vk_api.wall.post(owner_id=-99558704, message=data[0], attachments=data[1])
         for i in StaticData.admins:
