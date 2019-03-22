@@ -4,13 +4,11 @@ sys.path.append('./source/exceptions/')
 
 from BadIniException import BadIniException
 
-
 import os
 from configparser import ConfigParser
 from configparser import ParsingError
 from configparser import NoOptionError
 from StaticData import StaticData
-
 
 
 class InputWorker:
@@ -25,7 +23,6 @@ class InputWorker:
         except ParsingError:
             raise BadIniException
 
-
     def WorkOut(self):
         try:
             token = self.ini.get("Data", "Token")
@@ -33,5 +30,3 @@ class InputWorker:
             return [token, token_c]
         except:
             raise BadIniException
-
-

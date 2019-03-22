@@ -14,7 +14,7 @@ atexit.register(ExitHandler.bye)
 
 ### PREVIEW ###
 
-#Preview.do()
+# Preview.do()
 
 ### INPUT ###
 
