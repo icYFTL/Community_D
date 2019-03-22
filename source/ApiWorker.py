@@ -2,113 +2,108 @@ import sys
 
 sys.path.append('./source/exceptions/')
 
-from VkApiException import VkApiException
 from BotApi import BotApi
 from ImageHandler import ImageHandler
-from StaticData import StaticData
 from TimeHandler import TimeHandler
+from UserApi import UserApi
 
-import vk
-import random
 import os
 import requests
 from PIL import Image
-from datetime import datetime
 import time
 
 
 class ApiWorker:
     def __init__(self, token, token_c):
-        self.token = token
-        self.commtoken = token_c
-        self.vk_api = None
-        self.vk_api_c = None
-        self.get_session()
-        self.usedids = []
-        self.community_long_poll = None
-        self.available_posts = []
-        self.botapi = BotApi(self.commtoken)
-        self.time_handler = TimeHandler(self.botapi)
-
-    def get_session(self):
-        try:
-            print('Getting sessions...')
-
-            session = vk.Session(access_token=self.token)
-            self.vk_api = vk.API(session, v='5.74')
-
-            print('Got session for user.')
-
-        except:
-            raise VkApiException
+        self.token = token  # User's vk api token
+        self.commtoken = token_c  # Community's vk api token
+        self.botapi = BotApi(self.commtoken)  # Class which works with community's api
+        self.User = UserApi(token)  # Class which works with user's api
+        self.time_handler = TimeHandler(self.botapi)  # Class which looking for current time
+        self.usedids = []  # Used IDs of posts
 
     def groups_checker(self):
-        self.time_handler.time_controller()
+        '''
+        Checking groups in StaticData.groups for posts.
+        Function gets only fresh posts (with current date posted)
+        '''
+
+        self.time_handler.time_controller()  # Checking for times of day
 
         print('Started "GroupsChecker"')
-        current_date = self.time_handler.get_time().strftime('%Y-%m-%d').split('-')
 
-        for i in StaticData.groups:
-            posts = self.vk_api.wall.get(owner_id=int(i),
-                                         count=20, offset=0)
-            for j in range(len(posts.get('items'))):
-                post_date = datetime.utcfromtimestamp(int(posts.get('items')[j].get('date'))).strftime(
-                    '%Y-%m-%d').split('-')
-                if post_date == current_date:
-                    self.available_posts.append(posts.get('items')[j])
-            time.sleep(0.4)
-        print('"GroupsChecker" has been terminated.')
+        posts = self.User.posts_checker()  # Getting posts
 
-        if self.available_posts is []:
-            if self.time_handler.time_controller() is False:
-                self.botapi.write_msg('Посты кончились. Попробую на наличие новых через час.', None)
+        if posts is False:  # If there're no posts found
+            if self.time_handler.time_controller() is False:  # If day
+                print('Posts not found. Will retry in 1 hour')
+                self.botapi.write_msg('Постов нема. Попробую поискать их еще раз через 1 час.')
+                time.sleep(3600)
                 return False
-        return True
+        print('"GroupsChecker" has been done.')
+        return posts
 
     def parse_data(self):
+        '''
+        Parsing data from posts.
+        This function gets text and attachment from 1 post.
+        '''
+
         print('Parsing data has been started.')
-        if self.groups_checker() is False:
-            time.sleep(3600)
-            return
+
+        posts = self.groups_checker()  # Getting posts
+        while posts is False:  # While posts not found
+            print('Error while post getting. Retrying...')
+            posts = self.groups_checker()
+
         text = None
         attachment = None
-        for i in self.available_posts:
-            attachment_m = None
-            try:
-                if i.get('id') in self.usedids:
-                    continue
-                text = i.get('text')
-                attachment_m = i.get('attachments')
-                self.usedids.append(i.get('id'))
-            except:
-                continue
-            for j in attachment_m:
-                if j.get('type') == 'photo':
 
-                    if '2560' in str(j):
-                        attachment = j.get('photo').get('photo_2560')
-                    elif '1280' in str(j):
-                        attachment = j.get('photo').get('photo_1280')
-                    elif '807' in str(j):
-                        attachment = j.get('photo').get('photo_807')
-                    else:
-                        attachment = None
-                        print('I can\'t resolve photo.\nRetrying...')
-                        return
-            print('Got photo and text.')
-            return [text, attachment]
+        for i in posts:
+            if attachment is None:
+                try:
+                    if i.get('id') in self.usedids:  # Checking ID of post in used IDs
+                        continue
+                    text = i.get('text')  # Getting text from post
+                    if len(text) < 1:
+                        text = None
+                    attachment = i.get('attachments')
+                    self.usedids.append(i.get('id'))  # Mark current post as used
+                except:
+                    continue
+                if attachment:
+                    for j in attachment:  # Looking for highest size of picture
+                        if j.get('type') == 'photo':
+                            attachment = j.get('photo').get('sizes')[-1].get('url')
+                            break
+            else:
+                break
+
+            if attachment is None:
+                print('I can\'t resolve photo.\nRetrying...')
+                return False
+
+        print('Got photo and text.')
+        return [text, attachment]
 
     def before_post(self):
+        '''
+        Preparing for post:
+            • Saving photo on local
+            • Adding watermark on photo
+            • Image uploading to vk server
+            • Deleting photo
+            • Accepting messages sending
+            • Messages handling
+
+        '''
         print('Preparing for post has been initiated.')
+
         data = self.parse_data()
 
-        while data is None:
+        while data is False:
+            print('Error while parsing. Retrying...')
             data = self.parse_data()
-            time.sleep(1)
-
-        while data[0] is None or data[1] is None:
-            data = self.parse_data()
-            time.sleep(1)
 
         try:
             os.mkdir('./source/tmp/')
@@ -121,8 +116,7 @@ class ApiWorker:
             except requests.exceptions.MissingSchema:
                 print('Bad request.\nFunction will be restarted.')
                 f.close()
-                time.sleep(1)
-                return
+                return False
 
             f.close()
             print('Got photo.')
@@ -140,49 +134,45 @@ class ApiWorker:
 
             ## IMAGE UPLOADING ##
 
-            upload_server = self.vk_api.photos.getWallUploadServer(group_id=99558704)
-            temp_photo = requests.post(upload_server['upload_url'],
-                                       files={'photo': open('source/tmp/result.png', 'rb')}).json()
-            save_method = \
-                self.vk_api.photos.saveWallPhoto(group_id=99558704, photo=temp_photo['photo'],
-                                                 server=temp_photo['server'],
-                                                 hash=temp_photo['hash'])[0]
-            output = 'photo{}_{}'.format(save_method['owner_id'], save_method['id'])
-            data = [data[0], output]
+            data = [data[0], self.User.image_upload()]
             os.remove('./source/tmp/result.png')
             print('Image uploaded.')
 
             ## ACCEPTABLE MESSAGE SENDING
 
             self.botapi.write_msg(data[0], data[1])
-            time.sleep(0.5)
-            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Показать следующий пост')
+            time.sleep(0.4)
+            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Показать следующий пост', None)
 
             print('Messages sent.')
 
             ## WAIT FOR CALLBACK
 
             repl = self.botapi.message_handler()
+            username = self.User.get_user(repl[1])
 
-            if repl == '1':
+            if repl[0] == '1':
 
-                self.botapi.write_msg('Предыдущий пост был принят.', None)
+                self.User.post(data[0], data[1])
+                self.botapi.write_msg('Предыдущий пост был принят администратором {}'.format(username), None)
+                time.sleep(0.4)
 
-            elif repl == '2':
+                self.botapi.write_msg(
+                    'Следующий пост будет предложен через час, но вы можете пропустить эту задержку. Для этого отправьте 1.',
+                    None)
+                repl = [0]
 
-                self.botapi.write_msg('Предыдущий пост был отклонен.')
+                while repl[0] != '1':
+                    repl = self.botapi.message_handler()
+
+
+            elif repl[0] == '2':
+
+                self.botapi.write_msg('Предыдущий пост был отклонен администратором {}'.format(username), None)
                 return False
 
             print('Preparing done.')
             return data
 
-    def post(self):
+    def post(self):  # Posting
         data = self.before_post()
-
-        if data is False:
-            self.post()
-            print('\n\n\n\n')
-            return
-        if data is None:
-            return False
-        self.vk_api.wall.post(owner_id=-99558704, message=data[0], attachments=data[1])

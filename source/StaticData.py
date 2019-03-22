@@ -1,4 +1,4 @@
 class StaticData:
-    inipath = 'source/Data.ini'
-    groups = [-106427193, -33676586, -24306991, -86371517, -137194448]
-    admins = [239125937, ]
+    inipath = 'source/Data.ini'  # Default path
+    groups = []  # Communities IDs like [123456789, 987654321 ... ]
+    admins = []  # Users IDs like [123456789 , 987654321 ... ]

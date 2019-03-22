@@ -3,12 +3,10 @@ import sys
 sys.path.append('./source/exceptions/')
 
 from BadIniException import BadIniException
+from StaticData import StaticData
 
-import os
 from configparser import ConfigParser
 from configparser import ParsingError
-from configparser import NoOptionError
-from StaticData import StaticData
 
 
 class InputWorker:
@@ -18,12 +16,14 @@ class InputWorker:
         self.PathChecker()
 
     def PathChecker(self):
+        # Checking ini file path exists
         try:
             self.ini.read(self.path)
         except ParsingError:
             raise BadIniException
 
     def WorkOut(self):
+        # Getting tokens from Data.ini
         try:
             token = self.ini.get("Data", "Token")
             token_c = self.ini.get("Data", "Token_c")

@@ -4,4 +4,8 @@
 
 [Fixes] (v1.1)
 
-    • Работаю, я, работаю ебена рот
+    • Fixes
+
+[Full Release] (v.1.2)
+
+    • Work done.
