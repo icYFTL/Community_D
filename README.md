@@ -13,12 +13,12 @@
 
 * `I don't want to post all posts from other communities.`  
     We know that.
-    We create a system, which will offer the post before posting into your group.
+    We created a system, which will offer the post before posting into your group.
     Don't forget to specify your VK ID in "StaticData.py" in "admins".
 
 * `Which watermark will be adding to post's image?`  
     File with watermark have to be in "png" format and called "waterx.png'.
-    This file have to place in "source folder".
+    This file have to place in "source" folder.
     
 * `Why this readme in english but script using russian?`  
     IDK XD;
