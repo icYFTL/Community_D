@@ -142,7 +142,7 @@ class ApiWorker:
 
             self.botapi.write_msg(data[0], data[1])
             time.sleep(0.4)
-            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Показать следующий пост', None)
+            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Обновить', None)
 
             print('Messages sent.')
 
@@ -150,29 +150,21 @@ class ApiWorker:
 
             repl = self.botapi.message_handler()
             username = self.User.get_user(repl[1])
+            while True:
+                if repl[0] == '1':
 
-            if repl[0] == '1':
+                    self.User.post(data[0], data[1])
+                    self.botapi.write_msg('Предыдущий пост был принят администратором {}'.format(username), None)
+                    break
 
-                self.User.post(data[0], data[1])
-                self.botapi.write_msg('Предыдущий пост был принят администратором {}'.format(username), None)
-                time.sleep(0.4)
+                elif repl[0] == '2':
 
-                self.botapi.write_msg(
-                    'Следующий пост будет предложен через час, но вы можете пропустить эту задержку. Для этого отправьте 1.',
-                    None)
-                repl = [0]
+                    self.botapi.write_msg('Предыдущий пост был отклонен администратором {}'.format(username), None)
+                    return False
 
-                while repl[0] != '1':
-                    repl = self.botapi.message_handler()
-
-
-            elif repl[0] == '2':
-
-                self.botapi.write_msg('Предыдущий пост был отклонен администратором {}'.format(username), None)
-                return False
-
-            print('Preparing done.')
-            return data
+                else:
+                    self.botapi.write_msg('Напишите 1 или 2')
+                    continue
 
     def post(self):  # Posting
-        data = self.before_post()
+        self.before_post()
