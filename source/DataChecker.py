@@ -50,7 +50,6 @@ class DataChecker(object):
             f.close()
             md5 = hashlib.md5(file).hexdigest()
             if md5 != md5_original:
-                print(md5)
                 print('Not original file: {}'.format(name))
 
     def get_files():
