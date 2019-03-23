@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append('./source/')
-
 from VkApiException import VkApiException
 from Config import StaticData
 from StaticMethods import StaticMethods
@@ -57,8 +53,8 @@ class UserApi:
             print('Error while image downloading. Retrying...')
             return False
 
-    def get_user(self, id):
-        repl = self.vk.method('users.get', {'user_id': id})
+    def get_user(self, user_id):
+        repl = self.vk.method('users.get', {'user_id': user_id})
         repl = repl[0].get('first_name') + " " + repl[0].get('last_name')
         return repl
 

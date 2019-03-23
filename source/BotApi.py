@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append('./source/')
-
 from VkApiException import VkApiException
 from Config import StaticData
 

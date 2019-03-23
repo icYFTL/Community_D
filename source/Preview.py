@@ -7,7 +7,7 @@ class Preview(object):
     def do():
         CLSWork = ConsoleWorker()
         CLSWork.ClearConsole()
-        print('[CommD] v1.2 Release')
+        print('[CommD] v1.2.1 Release')
         corp = 'by icYFTL\n\n'
 
         for i in range(len(corp)):

@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append('./source/exceptions/')
-
 from BotApi import BotApi
 from ImageHandler import ImageHandler
 from TimeHandler import TimeHandler
@@ -24,7 +20,7 @@ class ApiWorker:
 
     def groups_checker(self):
         '''
-        Checking groups in StaticData.groups for posts.
+        Checking groups in Config.groups for posts.
         Function gets only fresh posts (with current date posted)
         '''
 
@@ -95,7 +91,6 @@ class ApiWorker:
             • Deleting photo
             • Accepting messages sending
             • Messages handling
-
         '''
         print('Preparing for post has been initiated.')
 
@@ -138,7 +133,7 @@ class ApiWorker:
             while image is False:
                 image = self.User.image_upload()
 
-            data = [data[0], ]
+            data = [data[0], image]
             os.remove('./source/tmp/result.png')
             print('Image uploaded.')
 

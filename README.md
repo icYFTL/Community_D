@@ -9,12 +9,12 @@
     and I haven't got any strikes yet.
 
 * `How can I specify communities from which I'll steal the posts?`  
-    You can specify them in "StaticData.py" in "groups".
+    You can specify them in "Config.py" in "groups".
 
 * `I don't want to post all posts from other communities.`  
     We know that.
     We created a system, which will offer the post before posting into your group.
-    Don't forget to specify your VK ID in "StaticData.py" in "admins".
+    Don't forget to specify your VK ID in "Config.py" in "admins".
 
 * `Which watermark will be adding to post's image?`  
     File with watermark have to be in "png" format and called "waterx.png'.
@@ -27,19 +27,11 @@
 
 
 #### DO NOT FORGET:
-    • Specify groups in "StaticData.py" in "groups".
-    • Specify admins in "StaticData.py" in "admins".
-    • Create "Data.ini" in "source" folder.
-    • Specify VK user access token in "Data.ini" # Look lower for example.
-    • Specify VK community access token in "Data.ini" # Look lower for example.
+    • Specify groups in "Config.py" in "groups".
+    • Specify admins in "Config.py" in "admins".
+    • Speficy VK user access token in "Config.py" in "vk_user_token".
+    • Speficy VK community access token in "Config.py" in "vk_community_token".
     • Do the "pip3 install -r (path_to_script)/requirements.txt"
-
-  
-##### Data.ini EXAMPLE  
-
-    [Data]  
-    token = Your VK user api token  
-    token_c = Your VK community api token
 
 
 That's all what I have to say.  

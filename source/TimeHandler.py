@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append('./source/')
-
 from StaticMethods import StaticMethods
 
 import time
