@@ -148,9 +148,9 @@ class ApiWorker:
 
             ## WAIT FOR CALLBACK
 
-            repl = self.botapi.message_handler()
-            username = self.User.get_user(repl[1])
             while True:
+                repl = self.botapi.message_handler()
+                username = self.User.get_user(repl[1])
                 if repl[0] == '1':
 
                     self.User.post(data[0], data[1])
