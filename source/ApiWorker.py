@@ -41,7 +41,7 @@ class ApiWorker:
                 time.sleep(3600)
                 return False
         print('"GroupsChecker" has been done.')
-        return postss
+        return posts
 
     def parse_data(self):
         '''
