@@ -8,23 +8,22 @@ sys.path.append('./source')
 class DataChecker(object):
     def checkout():
         try:
-            os.path.exists('./source/StaticData.py')
+            os.path.exists('./source/Config.py')
         except:
             pass
         DataChecker.check_md5()
         try:
-            from StaticData import StaticData
+            from Config import StaticData
             if len(StaticData.admins) < 1:
-                print('There\'re no admins in StaticData. Specify them.')
+                print('There\'re no admins in Config.py . Specify them.')
                 exit()
             if len(StaticData.groups) < 1:
-                print('There\'re no groups from which posts will be steal. Specify them.')
+                print('There\'re no groups in Config.py from which posts will be steal. Specify them.')
                 exit()
-            if os.path.exists(StaticData.inipath) is not True:
-                print('Bad ini file path in StaticData. Correct it.')
-                exit()
+            if StaticData.vk_user_token is None:
+                print('There\'re no user token in Config.py . Specify it.')
         except ImportError:
-            print('Can\'t find the StaticData.py. Where?')
+            print('Can\'t find the Config.py . Where?')
             exit()
         except Exception as e:
             print(str(e))

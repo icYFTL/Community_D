@@ -134,7 +134,11 @@ class ApiWorker:
 
             ## IMAGE UPLOADING ##
 
-            data = [data[0], self.User.image_upload()]
+            image = self.User.image_upload()
+            while image is False:
+                image = self.User.image_upload()
+
+            data = [data[0], ]
             os.remove('./source/tmp/result.png')
             print('Image uploaded.')
 

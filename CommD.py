@@ -3,10 +3,10 @@ import sys
 sys.path.append('./source')
 
 from Preview import Preview
-from InputWorker import InputWorker
 from ApiWorker import ApiWorker
 from ExitHandler import ExitHandler
 from DataChecker import DataChecker
+from Config import StaticData
 import atexit
 
 ### ATEXIT ###
@@ -23,12 +23,12 @@ Preview.do()
 
 ### INPUT ###
 
-input = InputWorker()
-token, token_c = map(str, input.WorkOut())
+user_token = StaticData.vk_user_token
+community_token = StaticData.vk_community_token
 
 ### API WORK ###
 
-ApiW = ApiWorker(token, token_c)
+ApiW = ApiWorker(user_token, community_token)
 
 while True:
     ApiW.post()

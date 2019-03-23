@@ -3,7 +3,7 @@ import sys
 sys.path.append('./source/')
 
 from VkApiException import VkApiException
-from StaticData import StaticData
+from Config import StaticData
 
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType

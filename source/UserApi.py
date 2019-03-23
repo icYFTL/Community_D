@@ -3,10 +3,11 @@ import sys
 sys.path.append('./source/')
 
 from VkApiException import VkApiException
-from StaticData import StaticData
+from Config import StaticData
 from StaticMethods import StaticMethods
 
 import vk_api
+from vk_api import exceptions
 import time
 from datetime import datetime
 import requests
@@ -43,14 +44,18 @@ class UserApi:
 
     def image_upload(self):
 
-        upload_server = self.vk.method('photos.getWallUploadServer', {'group_id': 99558704})
-        temp_photo = requests.post(upload_server['upload_url'],
-                                   files={'photo': open('source/tmp/result.png', 'rb')}).json()
-        save_method = \
-            self.vk.method('photos.saveWallPhoto', {'group_id': 99558704, 'photo': temp_photo['photo'],
-                                                    'server': temp_photo['server'],
-                                                    'hash': temp_photo['hash']})[0]
-        return 'photo{}_{}_{}'.format(save_method['owner_id'], save_method['id'], save_method['access_key'])
+        try:
+            upload_server = self.vk.method('photos.getWallUploadServer', {'group_id': 99558704})
+            temp_photo = requests.post(upload_server['upload_url'],
+                                       files={'photo': open('source/tmp/result.png', 'rb')}).json()
+            save_method = \
+                self.vk.method('photos.saveWallPhoto', {'group_id': 99558704, 'photo': temp_photo['photo'],
+                                                        'server': temp_photo['server'],
+                                                        'hash': temp_photo['hash']})[0]
+            return 'photo{}_{}_{}'.format(save_method['owner_id'], save_method['id'], save_method['access_key'])
+        except exceptions.ApiError:
+            print('Error while image downloading. Retrying...')
+            return False
 
     def get_user(self, id):
         repl = self.vk.method('users.get', {'user_id': id})
