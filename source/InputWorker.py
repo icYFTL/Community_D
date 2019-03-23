@@ -2,7 +2,6 @@ import sys
 
 sys.path.append('./source/exceptions/')
 
-from BadIniException import BadIniException
 from StaticData import StaticData
 
 from configparser import ConfigParser
@@ -20,7 +19,9 @@ class InputWorker:
         try:
             self.ini.read(self.path)
         except ParsingError:
-            raise BadIniException
+            print('Smth went wrong with Data.ini')
+            exit()
+
 
     def WorkOut(self):
         # Getting tokens from Data.ini
@@ -29,4 +30,5 @@ class InputWorker:
             token_c = self.ini.get("Data", "Token_c")
             return [token, token_c]
         except:
-            raise BadIniException
+            print('Smth went wrong with Data.ini')
+            exit()

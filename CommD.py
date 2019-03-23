@@ -6,11 +6,16 @@ from Preview import Preview
 from InputWorker import InputWorker
 from ApiWorker import ApiWorker
 from ExitHandler import ExitHandler
+from DataChecker import DataChecker
 import atexit
 
 ### ATEXIT ###
 
 atexit.register(ExitHandler.bye)
+
+### DATA CHECKER ###
+
+DataChecker.checkout()
 
 ### PREVIEW ###
 

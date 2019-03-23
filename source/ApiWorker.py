@@ -37,11 +37,11 @@ class ApiWorker:
         if posts is False:  # If there're no posts found
             if self.time_handler.time_controller() is False:  # If day
                 print('Posts not found. Will retry in 1 hour')
-                self.botapi.write_msg('Постов нема. Попробую поискать их еще раз через 1 час.')
+                self.botapi.write_msg('Постов нема. Попробую поискать их еще раз через 1 час.', None)
                 time.sleep(3600)
                 return False
         print('"GroupsChecker" has been done.')
-        return posts
+        return postss
 
     def parse_data(self):
         '''

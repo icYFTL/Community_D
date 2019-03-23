@@ -43,6 +43,6 @@ class TimeHandler:
                 time.sleep(7200 - int(current_time[1]) * 60)
             elif current_time[0] == '10':
                 time.sleep(3600 - int(current_time[1]) * 60)
-            else:
-                return False
+        else:
+            return False
         return True

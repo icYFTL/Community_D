@@ -37,8 +37,8 @@ class UserApi:
                 if post_date == current_date:
                     available_posts.append(posts.get('items')[j])
             time.sleep(0.4)
-            if len(available_posts) < 1:
-                return False
+        if len(available_posts) < 1:
+            return False
         return available_posts
 
     def image_upload(self):
