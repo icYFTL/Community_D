@@ -163,7 +163,7 @@ class ApiWorker:
                     return False
 
                 else:
-                    self.botapi.write_msg('Напишите 1 или 2')
+                    self.botapi.write_msg('Напишите 1 или 2', None)
                     continue
 
     def post(self):  # Posting
