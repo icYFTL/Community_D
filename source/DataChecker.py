@@ -32,7 +32,7 @@ class DataChecker(object):
     def check_md5():
         md5s = {'Preview.py': 'be50193c3eb3b6dcbd276286ef9c69cd',
                 'VkApiException.py': '6bb39b798551ad130af6d561fe50d1f6',
-                'ApiWorker.py': 'b86b76b1b8a02016554dd19711d77baa',
+                'ApiWorker.py': '5b82a8a41da211cb158315a51e8dd5f9',
                 'StaticMethods.py': '2dd06bf088c82518f466598fa461921a',
                 'UserApi.py': '3d341e3466741710ccaac3df57975be0',
                 'ConsoleWorker.py': 'ab0b55981d3d63049f1a5cf678626777',
@@ -50,6 +50,7 @@ class DataChecker(object):
             f.close()
             md5 = hashlib.md5(file).hexdigest()
             if md5 != md5_original:
+                print(md5)
                 print('Not original file: {}'.format(name))
 
     def get_files():

@@ -108,7 +108,7 @@ class ApiWorker:
             f = open('source/tmp/img.jpg', 'wb')
             try:
                 f.write(requests.get(data[1]).content)
-            except requests.exceptions.MissingSchema:
+            except:
                 print('Bad request.\nFunction will be restarted.')
                 f.close()
                 return False
