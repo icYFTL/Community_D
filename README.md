@@ -29,8 +29,9 @@
 #### DO NOT FORGET:
     • Specify groups in "Config.py" in "groups".
     • Specify admins in "Config.py" in "admins".
-    • Speficy VK user access token in "Config.py" in "vk_user_token".
-    • Speficy VK community access token in "Config.py" in "vk_community_token".
+    • Speficy VK user access token in "Config.py" in "vk_user_token".  
+    • Speficy VK community access token in "Config.py" in "vk_community_token".  
+    • Add waterx.png (watermark) into "source" directory.  
     • Do the "pip3 install -r (path_to_script)/requirements.txt"
 
 
