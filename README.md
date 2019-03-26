@@ -35,7 +35,7 @@
     • Add waterx.png (watermark) into "source" directory.  
     • Do the "pip3 install -r (path_to_script)/requirements.txt"
 
-####Tokens's rights:  
+#### Tokens's rights:  
 ##### 1) User: 
     wall,offline,groups,photos
 ##### 2) Community:
