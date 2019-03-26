@@ -30,7 +30,8 @@ class BotApi:
                                {'user_id': user, 'message': message, 'random_id': random.randint(0, 300000)})
             else:
                 self.vk.method('messages.send',
-                               {'user_id': user, 'attachment': attachment, 'random_id': random.randint(0, 300000)})
+                               {'user_id': user, 'attachment': attachment,
+                                'random_id': random.randint(0, 300000)})
 
         return True
 

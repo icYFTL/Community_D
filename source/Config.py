@@ -3,3 +3,4 @@ class StaticData:
     admins = []  # Users IDs like [123456789 , 987654321 ... ]
     vk_user_token = ""  # Change "" on your VK user access token like "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     vk_community_token = ""  # Change "" on your VK community access token like "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    vk_community_id = ""  # Change "" on your VK community ID like "123456789" *without mines*
