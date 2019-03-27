@@ -27,12 +27,19 @@ class UserApi:
 
         for i in StaticData.groups:
             try:
-                posts = self.vk.method('wall.get', {'owner_id': int(i), 'count': 20, 'offset': 0})
+                posts = self.vk.method('wall.get', {'owner_id': int(i), 'count': 50, 'offset': 0})
 
                 for j in range(len(posts.get('items'))):
                     post_date = datetime.utcfromtimestamp(int(posts.get('items')[j].get('date'))).strftime(
                         '%Y-%m-%d').split('-')
-                    if post_date == current_date:
+                    if StaticData.posts_fresh:
+                        for k in range(StaticData.posts_fresh):
+                            if post_date[0] == current_date[0]:
+                                if post_date[1] == current_date[1]:
+                                    if int(post_date[2]) + k == int(current_date[2]):
+                                        available_posts.append(posts.get('items')[j])
+                                        break
+                    else:
                         available_posts.append(posts.get('items')[j])
                 time.sleep(0.4)
             except vk_api.exceptions.ApiError as e:

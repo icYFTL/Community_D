@@ -2,6 +2,7 @@ from BotApi import BotApi
 from ImageHandler import ImageHandler
 from TimeHandler import TimeHandler
 from UserApi import UserApi
+from UsedIdsController import UsedIdsController
 
 import os
 import requests
@@ -16,7 +17,7 @@ class ApiWorker:
         self.botapi = BotApi(self.commtoken)  # Class which works with community's api
         self.User = UserApi(token)  # Class which works with user's api
         self.time_handler = TimeHandler(self.botapi)  # Class which looking for current time
-        self.usedids = []  # Used IDs of posts
+        self.usedids = UsedIdsController.read()
 
     def groups_checker(self):
         '''
@@ -58,13 +59,14 @@ class ApiWorker:
         for i in posts:
             if attachment is None:
                 try:
-                    if i.get('id') in self.usedids:  # Checking ID of post in used IDs
+                    if str(i.get('id')) in self.usedids:  # Checking ID of post in used IDs
                         continue
                     text = i.get('text')  # Getting text from post
                     if len(text) < 1:
                         text = None
                     attachment = i.get('attachments')
-                    self.usedids.append(i.get('id'))  # Mark current post as used
+                    self.usedids.append(str(i.get('id')))  # Mark current post as used
+                    UsedIdsController.write(i.get('id'))
                 except:
                     continue
                 if attachment:
