@@ -30,6 +30,7 @@ tmp/
 source/waterx.png
 .DS_Store
 data/
+source/Config.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

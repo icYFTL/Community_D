@@ -12,8 +12,8 @@ class TimeHandler:
         catched = False
         if not StaticData.workout_time:
             return True
-        for i in range(StaticData.workout_time[0], StaticData.workout_time[1]):
-            while StaticMethods.get_time().strftime('%H') != i:
+        for i in range(StaticData.workout_time[0] + 1, StaticData.workout_time[1]):
+            while StaticMethods.get_time().strftime('%H') == i:
                 if catched is False:
                     catched = True
                     self.botapi.write_msg(
