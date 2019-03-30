@@ -22,7 +22,7 @@ class DataChecker(object):
             if os.path.exists('./source/waterx.png') is False:
                 print('There\'re no waterx.png in "source" folder. Add it.')
                 exit()
-        except ModuleNotFoundError:
+        except ImportError:
             print('Can\'t find the Config.py . Where?')
             exit()
         except Exception as e:
