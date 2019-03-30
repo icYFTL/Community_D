@@ -12,13 +12,14 @@ class TimeHandler:
         catched = False
         if not StaticData.workout_time:
             return True
-        for i in range(StaticData.workout_time[0] + 1, StaticData.workout_time[1]):
-            while StaticMethods.get_time().strftime('%H') == i:
-                if catched is False:
-                    catched = True
+        while True:
+            if int(StaticMethods.get_time().strftime('%H')) not in range(StaticData.workout_time[0],
+                                                                         StaticData.workout_time[1] + 1):
+                time.sleep(3600 + int(StaticMethods.get_time().strftime('%H')) * 60)
+                if not catched:
                     self.botapi.write_msg(
-                        'Подготовка ко сну. Следующие посты будут доступны с {} часов.'.format(
-                            StaticData.workout_time[0]), None)
-                    print('Preparing for night.')
-                time.sleep(10)
+                        'Подготовка ко сну. Следующие посты будут доступны с {}'.format(StaticData.workout_time[0]),
+                        None)
+            else:
+                break
         return True
