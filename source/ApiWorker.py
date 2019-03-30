@@ -59,14 +59,15 @@ class ApiWorker:
         for i in posts:
             if attachment is None:
                 try:
-                    if str(i.get('id')) in self.usedids:  # Checking ID of post in used IDs
+                    if str(i.get('from_id')) + '_' + str(
+                            i.get('id')) in self.usedids:  # Checking ID of post in used IDs
                         continue
                     text = i.get('text')  # Getting text from post
                     if len(text) < 1:
                         text = None
                     attachment = i.get('attachments')
-                    self.usedids.append(str(i.get('id')))  # Mark current post as used
-                    UsedIdsController.write(i.get('id'))
+                    self.usedids.append(str(i.get('from_id')) + '_' + str(i.get('id')))  # Mark current post as used
+                    UsedIdsController.write(str(i.get('from_id')) + '_' + str(i.get('id')))
                 except:
                     continue
                 if attachment:
