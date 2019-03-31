@@ -17,7 +17,7 @@ class ApiWorker:
         self.botapi = BotApi(self.commtoken)  # Class which works with community's api
         self.User = UserApi(token)  # Class which works with user's api
         self.time_handler = TimeHandler(self.botapi)  # Class which looking for current time
-        self.usedids = UsedIdsController.read()
+        self.usedids = UsedIdsController.read()  # Getting usedids from file
 
     def groups_checker(self):
         '''
@@ -35,7 +35,7 @@ class ApiWorker:
             if self.time_handler.time_controller() is False:  # If day
                 print('Posts not found. Will retry in 1 hour')
                 self.botapi.write_msg('Постов нема. Попробую поискать их еще раз через 1 час.', None)
-                time.sleep(3600)
+                time.sleep(3600)  # if there're no posts -> sleep 1 hour
                 return False
         print('"GroupsChecker" has been done.')
         return posts
@@ -144,11 +144,11 @@ class ApiWorker:
 
             self.botapi.write_msg(data[0], data[1])
             time.sleep(0.4)
-            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Обновить', None)
+            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Следующий пост', None)
 
             print('Messages sent.')
 
-            ## WAIT FOR CALLBACK
+            ## WAITING FOR CALLBACK
 
             while True:
                 repl = self.botapi.message_handler()

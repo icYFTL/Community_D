@@ -7,7 +7,7 @@ class Preview(object):
     def do():
         CLSWork = ConsoleWorker()
         CLSWork.ClearConsole()
-        print('[CommD] v1.3 Beta Release')
+        print('[CommD] v1.4 Stable Alpha Release')
         corp = 'by icYFTL\n\n'
 
         notice = "If you got error or smth else: write me\nTelegram: @icYFTL\nDarkWeb: icyFTL"
