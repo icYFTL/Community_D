@@ -17,6 +17,7 @@ class TimeHandler:
                                                                          StaticData.workout_time[1] + 1):
                 time.sleep(3600 + int(StaticMethods.get_time().strftime('%H')) * 60)
                 if not catched:
+                    catched = True
                     self.botapi.write_msg(
                         'Подготовка ко сну. Следующие посты будут доступны с {}'.format(StaticData.workout_time[0]),
                         None)
