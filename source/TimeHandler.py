@@ -15,7 +15,7 @@ class TimeHandler:
         while True:
             if int(StaticMethods.get_time().strftime('%H')) not in range(StaticData.workout_time[0],
                                                                          StaticData.workout_time[1] + 1):
-                time.sleep(3600 + int(StaticMethods.get_time().strftime('%H')) * 60)
+                time.sleep(3600 + int(StaticMethods.get_time().strftime('%M')) * 60)
                 if not catched:
                     catched = True
                     self.botapi.write_msg(
