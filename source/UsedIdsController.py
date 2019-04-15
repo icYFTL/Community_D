@@ -14,7 +14,7 @@ class UsedIdsController(object):
 
     def write(id):
         if not UsedIdsController.directory():
-            print('Smth went wrong.')
+            print('Something went wrong with permissions.')
             exit()
         try:
             f = open('./data/used.txt', 'a')
@@ -26,7 +26,7 @@ class UsedIdsController(object):
 
     def read():
         if not UsedIdsController.directory():
-            print('Smth went wrong.')
+            print('Something went wrong with permissions.')
             exit()
         try:
             f = open('./data/used.txt', 'r')

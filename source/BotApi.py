@@ -1,5 +1,4 @@
-from VkApiException import VkApiException
-from Config import StaticData
+from Config import Config
 
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
@@ -11,14 +10,15 @@ class BotApi:
     def __init__(self, token):
         self.token = token
         self.vk = None
-        self.users = StaticData.admins
+        self.users = Config.admins
         self.get_session()
 
     def get_session(self):
         try:
             self.vk = vk_api.VkApi(token=self.token)
         except:
-            raise VkApiException
+            print('Bad community\'s access token\\s. Or VkApi internal error.')
+            exit()
 
     def write_msg(self, message, attachment):
         for user in self.users:
@@ -43,6 +43,6 @@ class BotApi:
             if event.type == VkEventType.MESSAGE_NEW:
 
                 if event.to_me:
-                    if event.user_id in StaticData.admins:
+                    if event.user_id in Config.admins:
                         request = event.text
                         return [request, event.user_id]

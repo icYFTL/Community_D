@@ -1,5 +1,5 @@
-from StaticMethods import StaticMethods
-from Config import StaticData
+from source.StaticMethods import StaticMethods
+from Config import Config
 
 import time
 
@@ -10,16 +10,16 @@ class TimeHandler:
 
     def time_controller(self):
         catched = False
-        if not StaticData.workout_time:
+        if not Config.workout_time:
             return True
         while True:
-            if int(StaticMethods.get_time().strftime('%H')) not in range(StaticData.workout_time[0],
-                                                                         StaticData.workout_time[1] + 1):
+            if int(StaticMethods.get_time().strftime('%H')) not in range(Config.workout_time[0],
+                                                                         Config.workout_time[1] + 1):
                 time.sleep(3600 + int(StaticMethods.get_time().strftime('%M')) * 60)
                 if not catched:
                     catched = True
                     self.botapi.write_msg(
-                        'Подготовка ко сну. Следующие посты будут доступны с {}'.format(StaticData.workout_time[0]),
+                        'Подготовка ко сну. Следующие посты будут доступны с {}'.format(Config.workout_time[0]),
                         None)
             else:
                 break

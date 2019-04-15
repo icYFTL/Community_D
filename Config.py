@@ -1,8 +1,8 @@
-class StaticData:
+class Config:
     groups = []  # Communities IDs like [-123456789, -987654321 ... ] *Minus is important
     admins = []  # Users IDs like [123456789 , 987654321 ... ]
-    vk_user_token = ""  # Change "" on your VK user access token like "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    vk_community_token = ""  # Change "" on your VK community access token like "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    vk_user_token = ""  # Change "" on your VK user access token
+    vk_community_token = ""  # Change "" on your VK community access token
     vk_community_id = ""  # Change "" on your VK community ID like "123456789" *without mines*
     workout_time = [11,
                     23]  # Change this values on your own. For example: [11, 23] - 11 PM scripts starts, 23 AM - scripts going to sleep up to 11. Or you can off this time-checking by "workout_time = None"

@@ -1,16 +1,17 @@
 import sys
 import time
-from ConsoleWorker import ConsoleWorker
+from source.ConsoleWorker import ConsoleWorker
+from source.StaticData import StaticData
 
 
 class Preview(object):
     def do():
         CLSWork = ConsoleWorker()
         CLSWork.ClearConsole()
-        print('[CommD] v1.4 Stable Alpha Release')
+        print('[CommD] v{} Stable Alpha Release'.format(StaticData.version))
         corp = 'by icYFTL\n\n'
 
-        notice = "If you got error or smth else: write me\nTelegram: @icYFTL\nDarkWeb: icyFTL"
+        notice = "If you got error or smth else: write me\nTelegram: @icYFTL\nDarkWeb: Denuvo"
 
         for i in range(len(corp)):
             if corp[i].isalpha() or corp[i - 1].isalpha() and i != 0:

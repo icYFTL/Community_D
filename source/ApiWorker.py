@@ -1,8 +1,8 @@
-from BotApi import BotApi
-from ImageHandler import ImageHandler
-from TimeHandler import TimeHandler
-from UserApi import UserApi
-from UsedIdsController import UsedIdsController
+from source.BotApi import BotApi
+from source.ImageHandler import ImageHandler
+from source.TimeHandler import TimeHandler
+from source.UserApi import UserApi
+from source.UsedIdsController import UsedIdsController
 
 import os
 import requests
@@ -18,6 +18,10 @@ class ApiWorker:
         self.User = UserApi(token)  # Class which works with user's api
         self.time_handler = TimeHandler(self.botapi)  # Class which looking for current time
         self.usedids = UsedIdsController.read()  # Getting usedids from file
+        self.initializator()
+
+    def initializator(self):
+        self.botapi.write_msg('Скрипт был запущен.', None)
 
     def groups_checker(self):
         '''
@@ -66,8 +70,9 @@ class ApiWorker:
                     if len(text) < 1:
                         text = None
                     attachment = i.get('attachments')
-                    self.usedids.append(str(i.get('from_id')) + '_' + str(i.get('id')))  # Mark current post as used
-                    UsedIdsController.write(str(i.get('from_id')) + '_' + str(i.get('id')))
+                    self.usedids.append(
+                        '{}_{}'.format(str(i.get('from_id')), str(i.get('id'))))  # Mark current post as used
+                    UsedIdsController.write('{}_{}'.format(str(i.get('from_id')), str(i.get('id'))))
                 except:
                     continue
                 if attachment:
@@ -156,12 +161,12 @@ class ApiWorker:
                 if repl[0] == '1':
 
                     self.User.post(data[0], data[1])
-                    self.botapi.write_msg('Предыдущий пост был принят администратором {}'.format(username), None)
+                    self.botapi.write_msg('Предыдущий пост был принят пользователем {}'.format(username), None)
                     break
 
                 elif repl[0] == '2':
 
-                    self.botapi.write_msg('Предыдущий пост был отклонен администратором {}'.format(username), None)
+                    self.botapi.write_msg('Предыдущий пост был отклонен пользователем {}'.format(username), None)
                     return False
 
                 else:
