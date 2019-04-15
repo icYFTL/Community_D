@@ -15,12 +15,13 @@ class TimeHandler:
         while True:
             if int(StaticMethods.get_time().strftime('%H')) not in range(Config.workout_time[0],
                                                                          Config.workout_time[1] + 1):
-                time.sleep(3600 + int(StaticMethods.get_time().strftime('%M')) * 60)
                 if not catched:
                     catched = True
                     self.botapi.write_msg(
                         'Подготовка ко сну. Следующие посты будут доступны с {}'.format(Config.workout_time[0]),
                         None)
+                time.sleep(3600 + int(StaticMethods.get_time().strftime('%M')) * 60)
+
             else:
                 break
         return True
