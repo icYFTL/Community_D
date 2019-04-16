@@ -20,7 +20,7 @@ class TimeHandler:
                     self.botapi.write_msg(
                         'Подготовка ко сну. Следующие посты будут доступны с {}'.format(Config.workout_time[0]),
                         None)
-                time.sleep(3600 + int(StaticMethods.get_time().strftime('%M')) * 60)
+                time.sleep(3600 - int(StaticMethods.get_time().strftime('%M')) * 60)
 
             else:
                 break
