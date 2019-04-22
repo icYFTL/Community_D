@@ -1,31 +1,34 @@
 import os
+import hues
 
-class DataChecker(object):
+
+class DataChecker:
+    @staticmethod
     def checkout():
         try:
             from Config import Config
             if len(Config.admins) < 1:
-                print('There\'re no admins in Config.py. Specify them.')
+                hues.error('There\'re no admins in Config.py. Specify them.')
                 exit()
             if len(Config.groups) < 1:
-                print('There\'re no groups in Config.py from which posts will be steal. Specify them.')
+                hues.error('There\'re no groups in Config.py from which posts will be steal. Specify them.')
                 exit()
             if Config.vk_user_token == "":
-                print('There\'re no user token in Config.py. Specify it.')
+                hues.error('There\'re no user token in Config.py. Specify it.')
                 exit()
             if Config.vk_community_token == "":
-                print('There\'re no community token in Config.py. Specify it.')
+                hues.error('There\'re no community token in Config.py. Specify it.')
                 exit()
             if Config.vk_community_id == "":
-                print('There\'re no community ID in Config.py. Specify it.')
+                hues.error('There\'re no community ID in Config.py. Specify it.')
                 exit()
             if os.path.exists('./source/waterx.png') is False:
-                print('There\'re no waterx.png in "source" folder. Add it.')
+                hues.error('There\'re no waterx.png in "source" folder. Add it.')
                 exit()
         except ImportError:
-            print('Can\'t find the Config.py. Where?')
+            hues.error('Can\'t find the Config.py. Where?')
             exit()
         except Exception as e:
-            print(str(e))
-            print('Error while DataCheck.')
+            hues.warn(str(e))
+            hues.error('Error while DataCheck.')
             exit()

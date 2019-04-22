@@ -1,5 +1,7 @@
 from source.StaticMethods import StaticMethods
 from Config import Config
+import hues
+
 
 import time
 
@@ -20,6 +22,7 @@ class TimeHandler:
                     self.botapi.write_msg(
                         'Подготовка ко сну. Следующие посты будут доступны с {}'.format(Config.workout_time[0]),
                         None)
+                hues.warn('Going to sleep up to {}'.format(Config.workout_time[0]))
                 time.sleep(3600 - int(StaticMethods.get_time().strftime('%M')) * 60)
 
             else:

@@ -3,6 +3,7 @@ from source.ImageHandler import ImageHandler
 from source.TimeHandler import TimeHandler
 from source.UserApi import UserApi
 from source.UsedIdsController import UsedIdsController
+import hues
 
 import os
 import requests
@@ -22,6 +23,7 @@ class ApiWorker:
 
     def initializator(self):
         self.botapi.write_msg('Скрипт был запущен.', None)
+        hues.success('Script has been started')
 
     def groups_checker(self):
         '''
@@ -31,17 +33,17 @@ class ApiWorker:
 
         self.time_handler.time_controller()  # Checking for times of day
 
-        print('Started "GroupsChecker"')
+        hues.log('Started "GroupsChecker"')
 
         posts = self.User.posts_checker()  # Getting posts
 
         if posts is False:  # If there're no posts found
             if self.time_handler.time_controller() is False:  # If day
-                print('Posts not found. Will retry in 1 hour')
+                hues.log('Posts not found. Will retry in 1 hour')
                 self.botapi.write_msg('Постов нема. Попробую поискать их еще раз через 1 час.', None)
                 time.sleep(3600)  # if there're no posts -> sleep 1 hour
                 return False
-        print('"GroupsChecker" has been done.')
+        hues.log('"GroupsChecker" has been done.')
         return posts
 
     def parse_data(self):
@@ -50,45 +52,61 @@ class ApiWorker:
         This function gets text and attachment from 1 post.
         '''
 
-        print('Parsing data has been started.')
+        hues.log('Parsing data has been started.')
 
         posts = self.groups_checker()  # Getting posts
         while posts is False:  # While posts not found
-            print('Error while post getting. Retrying...')
+            hues.warn('Error while post getting. Retrying...')
             posts = self.groups_checker()
 
         text = None
         attachment = None
 
         for i in posts:
-            if attachment is None:
-                try:
-                    if str(i.get('from_id')) + '_' + str(
-                            i.get('id')) in self.usedids:  # Checking ID of post in used IDs
-                        continue
-                    text = i.get('text')  # Getting text from post
-                    if len(text) < 1:
-                        text = None
-                    attachment = i.get('attachments')
-                    self.usedids.append(
-                        '{}_{}'.format(str(i.get('from_id')), str(i.get('id'))))  # Mark current post as used
-                    UsedIdsController.write('{}_{}'.format(str(i.get('from_id')), str(i.get('id'))))
-                except:
-                    continue
-                if attachment:
-                    for j in attachment:  # Looking for highest size of picture
-                        if j.get('type') == 'photo':
-                            attachment = j.get('photo').get('sizes')[-1].get('url')
-                            break
+            text = self.get_text(i)
+            attachment = self.get_photo(i)
+
+            if not text or not attachment:
+                continue
+            break
+        if text:
+            if attachment:
+                pass
             else:
-                break
+                attachment = None
+        else:
+            text = None
 
-            if attachment is None:
-                print('I can\'t resolve photo.\nRetrying...')
-                return False
-
-        print('Got photo and text.')
+        hues.log('Got photo and text.')
         return [text, attachment]
+
+    def get_text(self, data):
+        data = data.get('text')
+        if len(data) < 1:
+            return False
+        return data
+
+    def get_photo(self, data):
+        attachment = None
+        try:
+            if str(data.get('from_id')) + '_' + str(
+                    data.get('id')) in self.usedids:  # Checking ID of post in used IDs
+                return False
+            attachment = data.get('attachments')
+            self.usedids.append(
+                '{}_{}'.format(str(data.get('from_id')), str(data.get('id'))))  # Mark current post as used
+            UsedIdsController.write('{}_{}'.format(str(data.get('from_id')), str(data.get('id'))))
+        except:
+            return False
+        if attachment:
+            for j in attachment:  # Looking for highest size of picture
+                if j.get('type') == 'photo':
+                    attachment = j.get('photo').get('sizes')[-1].get('url')
+                    return attachment
+        else:
+            hues.warn('I can\'t resolve photo.\nRetrying...')
+            return False
+        return False
 
     def before_post(self):
         '''
@@ -100,12 +118,12 @@ class ApiWorker:
             • Accepting messages sending
             • Messages handling
         '''
-        print('Preparing for post has been initiated.')
+        hues.log('Preparing for post has been initiated.')
 
         data = self.parse_data()
 
         while data is False:
-            print('Error while parsing. Retrying...')
+            hues.warn('Error while parsing. Retrying...')
             data = self.parse_data()
 
         try:
@@ -117,12 +135,12 @@ class ApiWorker:
             try:
                 f.write(requests.get(data[1]).content)
             except:
-                print('Bad request.\nFunction will be restarted.')
+                hues.warn('Bad request.\nFunction will be restarted.')
                 f.close()
                 return False
 
             f.close()
-            print('Got photo.')
+            hues.log('Got photo.')
 
             ## WATERMARK LANDING ##
 
@@ -133,31 +151,32 @@ class ApiWorker:
             result.save('./source/tmp/result.png')
 
             os.remove('source/tmp/img.jpg')
-            print('Watermark landing done.')
+            hues.log('Watermark landing done.')
 
             ## IMAGE UPLOADING ##
 
             image = self.User.image_upload()
-            while image is False:
-                image = self.User.image_upload()
+            if image is False:
+                image = None
 
             data = [data[0], image]
             os.remove('./source/tmp/result.png')
-            print('Image uploaded.')
+            hues.log('Image uploaded.')
 
             ## ACCEPTABLE MESSAGE SENDING
 
             self.botapi.write_msg(data[0], data[1])
             time.sleep(0.4)
-            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Следующий пост', None)
+            self.botapi.write_msg('Сделать пост?\n1 - Запостить\n2 - Следующий пост',
+                                  None)
 
-            print('Messages sent.')
+            hues.log('Messages sent.')
 
             ## WAITING FOR CALLBACK
 
             while True:
                 repl = self.botapi.message_handler()
-                username = self.User.get_user(repl[1])
+                username = self.User.get_user(repl[2])
                 if repl[0] == '1':
 
                     self.User.post(data[0], data[1])
@@ -168,7 +187,6 @@ class ApiWorker:
 
                     self.botapi.write_msg('Предыдущий пост был отклонен пользователем {}'.format(username), None)
                     return False
-
                 else:
                     self.botapi.write_msg('Напишите 1 или 2', None)
                     continue

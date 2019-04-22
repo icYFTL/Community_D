@@ -6,6 +6,8 @@ from vk_api import exceptions
 import time
 from datetime import datetime
 import requests
+import random
+import hues
 
 
 class UserApi:
@@ -18,17 +20,18 @@ class UserApi:
         try:
             self.vk = vk_api.VkApi(token=self.token)
         except:
-            print('Bad user\'s access token\\s. Or VkApi internal error.')
+            hues.error('Bad user\'s access token\\s. Or VkApi internal error.')
             exit()
 
     def posts_checker(self):
         available_posts = []
         current_date = StaticMethods.get_time().strftime('%Y-%m-%d').split('-')
 
-        for i in Config.groups:
+        for i in range(len(Config.groups)):
             try:
-                posts = self.vk.method('wall.get', {'owner_id': int(i), 'count': 50, 'offset': 0})
-
+                posts = self.vk.method('wall.get',
+                                       {'owner_id': Config.groups[random.randint(0, len(Config.groups) - 1)],
+                                        'count': 50, 'offset': 0})
                 for j in range(len(posts.get('items'))):
                     post_date = datetime.utcfromtimestamp(int(posts.get('items')[j].get('date'))).strftime(
                         '%Y-%m-%d').split('-')
@@ -61,8 +64,9 @@ class UserApi:
                                 'server': temp_photo['server'],
                                 'hash': temp_photo['hash']})[0]
             return 'photo{}_{}_{}'.format(save_method['owner_id'], save_method['id'], save_method['access_key'])
-        except exceptions.ApiError:
-            print('Error while image downloading. Retrying...')
+        except exceptions.ApiError as e:
+            print(str(e))
+            hues.warn('Error while image downloading. Retrying...')
             return False
 
     def get_user(self, user_id):
@@ -71,8 +75,8 @@ class UserApi:
         return repl
 
     def post(self, text, image):
-        if text is not None:
+        if text:
             self.vk.method('wall.post',
                            {'owner_id': -int(Config.vk_community_id), 'message': text, 'attachments': image})
-        elif text is None:
+        elif not text:
             self.vk.method('wall.post', {'owner_id': -int(Config.vk_community_id), 'attachments': image})

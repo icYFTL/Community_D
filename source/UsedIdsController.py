@@ -1,7 +1,9 @@
 import os
+import hues
 
 
-class UsedIdsController(object):
+class UsedIdsController:
+    @staticmethod
     def directory():
         if os.path.exists('./data/'):
             return True
@@ -12,9 +14,10 @@ class UsedIdsController(object):
                 return False
         return True
 
+    @staticmethod
     def write(id):
         if not UsedIdsController.directory():
-            print('Something went wrong with permissions.')
+            hues.error('Something went wrong with permissions.')
             exit()
         try:
             f = open('./data/used.txt', 'a')
@@ -24,9 +27,10 @@ class UsedIdsController(object):
             return False
         return True
 
+    @staticmethod
     def read():
         if not UsedIdsController.directory():
-            print('Something went wrong with permissions.')
+            hues.error('Something went wrong with permissions.')
             exit()
         try:
             f = open('./data/used.txt', 'r')

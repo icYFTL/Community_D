@@ -4,7 +4,8 @@ from source.ConsoleWorker import ConsoleWorker
 from source.StaticData import StaticData
 
 
-class Preview(object):
+class Preview:
+    @staticmethod
     def do():
         CLSWork = ConsoleWorker()
         CLSWork.ClearConsole()

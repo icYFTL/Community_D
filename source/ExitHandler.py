@@ -1,9 +1,11 @@
 import os
 from source.BotApi import BotApi
 from Config import Config
+import hues
 
 
-class ExitHandler(object):
+class ExitHandler:
+    @staticmethod
     def bye():
         try:
             BA = BotApi(Config.vk_community_token)
@@ -11,7 +13,7 @@ class ExitHandler(object):
         except:
             pass
 
-        print('Shutting down...')
+        hues.warn('Shutting down...')
 
         try:
             os.remove('source/tmp/img.jpg')

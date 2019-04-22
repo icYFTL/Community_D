@@ -2,3 +2,4 @@ Pillow==5.4.1
 requests==2.21.0
 pytz==2018.9
 vk-api==11.4.0
+hues==0.2.2
