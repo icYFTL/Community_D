@@ -7,8 +7,7 @@ from source.StaticData import StaticData
 class Preview:
     @staticmethod
     def do():
-        CLSWork = ConsoleWorker()
-        CLSWork.ClearConsole()
+        ConsoleWorker.ClearConsole()
         print('[CommD] v{} Stable Alpha Release'.format(StaticData.version))
         corp = 'by icYFTL\n\n'
 
