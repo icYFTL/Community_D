@@ -34,6 +34,7 @@
     • Specift VK community ID in "Config.py" in "vk_community_id".  
     • Add waterx.png (watermark) into "source" directory.  
     • Do the "pip3 install -r (path_to_script)/requirements.txt"
+    • Enable "Bots features" in community's settings.
 
 #### Tokens's rights:  
 ##### 1) User: 
