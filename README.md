@@ -20,7 +20,7 @@
     File with watermark have to be in "png" format and called "waterx.png'.
     This file have to place in "source" folder.
     
-* `Why this readme in english but script using russian?`  
+* `Why this readme in english but script uses russian?`  
     IDK XD;
 
 
