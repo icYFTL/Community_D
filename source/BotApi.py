@@ -23,21 +23,25 @@ class BotApi:
             exit()
 
     def write_msg(self, message, attachment):
-        for user in self.users:
-            if attachment is not None and message is not None:
-                self.vk.method('messages.send', {'user_id': user, 'message': message, 'attachment': attachment,
-                                                 'random_id': random.randint(0, 300000),
-                                                 'keyboard': JSONWorker.read_json('default.json')})
-            elif message is not None:
-                self.vk.method('messages.send',
-                               {'user_id': user, 'message': message, 'random_id': random.randint(0, 300000),
-                                'keyboard': JSONWorker.read_json('default.json')})
-            else:
-                self.vk.method('messages.send',
-                               {'user_id': user, 'attachment': attachment,
-                                'random_id': random.randint(0, 300000),
-                                'keyboard': JSONWorker.read_json('default.json')})
-
+        if not message:
+            message = None
+        try:
+            for user in self.users:
+                if attachment is not None and message is not None:
+                    self.vk.method('messages.send', {'user_id': user, 'message': message, 'attachment': attachment,
+                                                     'random_id': random.randint(0, 300000),
+                                                     'keyboard': JSONWorker.read_json('default.json')})
+                elif message is not None:
+                    self.vk.method('messages.send',
+                                   {'user_id': user, 'message': message, 'random_id': random.randint(0, 300000),
+                                    'keyboard': JSONWorker.read_json('default.json')})
+                else:
+                    self.vk.method('messages.send',
+                                   {'user_id': user, 'attachment': attachment,
+                                    'random_id': random.randint(0, 300000),
+                                    'keyboard': JSONWorker.read_json('default.json')})
+        except:
+            return False
         return True
 
     def message_handler(self):

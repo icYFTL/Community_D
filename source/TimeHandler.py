@@ -3,7 +3,6 @@ from Config import Config
 from source.JSONWorker import JSONWorker
 import hues
 
-
 import time
 
 

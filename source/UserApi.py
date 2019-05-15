@@ -3,7 +3,6 @@ from source.StaticMethods import StaticMethods
 
 import vk_api
 from vk_api import exceptions
-import time
 from datetime import datetime
 import requests
 import random
@@ -27,29 +26,29 @@ class UserApi:
         available_posts = []
         current_date = StaticMethods.get_time().strftime('%Y-%m-%d').split('-')
 
-        for i in range(len(Config.groups)):
-            try:
-                posts = self.vk.method('wall.get',
-                                       {'owner_id': Config.groups[random.randint(0, len(Config.groups) - 1)],
-                                        'count': 50, 'offset': 0})
-                for j in range(len(posts.get('items'))):
-                    post_date = datetime.utcfromtimestamp(int(posts.get('items')[j].get('date'))).strftime(
-                        '%Y-%m-%d').split('-')
-                    if Config.posts_fresh:
-                        for k in range(Config.posts_fresh):
-                            if post_date[0] == current_date[0]:
-                                if post_date[1] == current_date[1]:
-                                    if int(post_date[2]) + k == int(current_date[2]):
-                                        available_posts.append(posts.get('items')[j])
-                                        break
-                    else:
-                        available_posts.append(posts.get('items')[j])
-                time.sleep(0.4)
-            except vk_api.exceptions.ApiError as e:
-                if '[15]' in str(e):
-                    continue
-        if len(available_posts) < 1:
-            return False
+        while len(available_posts) < 50:
+            for i in range(len(Config.groups)):
+                try:
+                    posts = self.vk.method('wall.get',
+                                           {'owner_id': Config.groups[random.randint(0, len(Config.groups) - 1)],
+                                            'count': 10, 'offset': 0})
+                    for j in range(len(posts.get('items'))):
+                        if len(available_posts) >= 50:
+                            break
+                        post_date = datetime.utcfromtimestamp(int(posts.get('items')[j].get('date'))).strftime(
+                            '%Y-%m-%d').split('-')
+                        if Config.posts_fresh != None:  # important
+                            for k in range(Config.posts_fresh + 1):
+                                if post_date[0] == current_date[0]:
+                                    if post_date[1] == current_date[1]:
+                                        if int(post_date[2]) + k == int(current_date[2]):
+                                            available_posts.append(posts.get('items')[j])
+                                            break
+                        else:
+                            available_posts.append(posts.get('items')[j])
+                except vk_api.exceptions.ApiError as e:
+                    if '[15]' in str(e):
+                        continue
         return available_posts
 
     def image_upload(self):
@@ -57,7 +56,7 @@ class UserApi:
         try:
             upload_server = self.vk.method('photos.getWallUploadServer', {'group_id': int(Config.vk_community_id)})
             temp_photo = requests.post(upload_server['upload_url'],
-                                       files={'photo': open('source/tmp/result.png', 'rb')}).json()
+                                       files={'photo': open('source/tmp/result.jpg', 'rb')}).json()
             save_method = \
                 self.vk.method('photos.saveWallPhoto',
                                {'group_id': int(Config.vk_community_id), 'photo': temp_photo['photo'],
@@ -75,8 +74,8 @@ class UserApi:
         return repl
 
     def post(self, text, image):
-        if text:
+        if text != 'False':
             self.vk.method('wall.post',
                            {'owner_id': -int(Config.vk_community_id), 'message': text, 'attachments': image})
-        elif not text:
+        else:
             self.vk.method('wall.post', {'owner_id': -int(Config.vk_community_id), 'attachments': image})

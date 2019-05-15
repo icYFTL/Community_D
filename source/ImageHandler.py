@@ -1,30 +1,30 @@
 from PIL import Image
-from PIL import ImageEnhance
 import random
 
 
-class ImageHandler(object):
-    """
-    image - картинка, на которую накладываете изображение
-    watermark - картинка, которую накладываете
-    opacity - прозрачность
-    wm_interval - интервал между изображениями watermark
-    """
+class ImageHandler:
 
-    def add_watermark(image, watermark, opacity=1, wm_interval=0):
+    @staticmethod
+    def watermark_with_transparency(image):
+        base_image = Image.open(image)
+        watermark = ImageHandler.watermark_resizer(base_image, Image.open('source/waterx.png'))
+        width, height = base_image.size
+        widthw, heightw = watermark.size
 
-        assert opacity >= 0 and opacity <= 1
-        if opacity < 1:
-            if watermark.mode != 'RGBA':
-                watermark = watermark.convert('RGBA')
-            else:
-                watermark = watermark.copy()
-            alpha = watermark.split()[3]
-            alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
-            watermark.putalpha(alpha)
-        layer = Image.new('RGBA', (1280, 640), (0, 0, 0, 0))
-        a = random.randint(-20, 0)
-        b = random.randint(-20, 0)
-        layer.paste(watermark, (a, b))
+        transparent = Image.new('RGB', (width, height), (0, 0, 0, 0))
+        transparent.paste(base_image, (0, 0))
+        position = (random.randint(0, width - widthw), random.randint(0, height - heightw))
+        transparent.paste(watermark, position, mask=watermark)
+        transparent.save('source/tmp/result.jpg')
 
-        return Image.composite(layer, image, layer)
+    @staticmethod
+    def watermark_resizer(image, watermark):
+        if image.size[0] < 605 or image.size[1] < 605:
+            return watermark.resize((200, 200))
+        elif image.size[0] < 807 or image.size[1] < 807:
+            return watermark.resize((250, 250))
+        elif image.size[0] < 1080 or image.size[1] < 1024:
+            return watermark.resize((300, 300))
+        elif image.size[0] < 2560 or image.size[1] < 2048:
+            return watermark.resize((600, 600))
+        return watermark.resize((300, 300))
